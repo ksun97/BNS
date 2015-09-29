@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emitter imageName="" name="Test Particle">
+    <!-- Time between each wave(ms)-->
+    <spawnInterval enabled="true" max="100.0" min="100.0"/>
+    <!-- The number of to spawn at one time-->
+    <spawnCount enabled="true" max="10" min="10"/>
+    <!--How long the particle lasts-->
+    <initialLife enabled="true" max="1000.0" min="1000.0"/>
+    <!--The size of the particles-->
+    <initialSize enabled="true" max="10.0" min="10.0"/>
+    <!-- The spawn offsetX from the center point (Change to created snow and rain like effects-->
+    <xOffset enabled="true" max="20.0" min="-20.0"/>
+    <!-- The spawn offsetY from the center point -->
+    <yOffset enabled="true" max="20.0" min="-20.0"/>
+    <!--Changes the radius of the spawn point-->
+    <initialDistance enabled="true" max="10" min="10"/>
+    <!--Changes the speed of the particles-->
+    <speed enabled="true" max="100.0" min="100"/>
+    <!--The length the particle effect occurs(ms). Not the length of the particles-->
+    <length enabled="true" max="100" min="100"/>
+    <!--The angle of the spread of the particle effect -->
+    <spread value="180"/>
+    <!--The starting position of the spread of the effect -->
+    <angularOffset value="00.0"/>
+    <!--The change in size over time-->
+    <growthFactor value="0"/>
+    <!-- Gravity -->
+    <gravityFactor value="10"/>
+    <!-- Alpha used for fading out effects -->
+    <startAlpha value="255.0"/>
+    <endAlpha value="255"/>
+    <!-- Changes in color over time. The first step is the starting value and the particles change to the second step over time-->
+    <color>
+        <step r="1" b="0" g="0" offset=".5"/>
+    </color>
+
+</emitter>

@@ -1,0 +1,147 @@
+package attack
+
+import gamestates.NormalStage
+import gobjects.enemies.Enemy
+import gobjects.{GObject, Player}
+import org.newdawn.slick.Graphics
+import org.newdawn.slick.geom.Rectangle
+
+import scala.collection.mutable.ListBuffer
+
+case class Attack(damage: Int, fireInterval: Long, bulletVelX: Float, bulletVelY:
+Float = 0)(changeStage: Long => Boolean) {
+  var bullets = new ListBuffer[Bullet]
+  var fireTime = -1L
+  var startTime = -1L
+
+  def updateBullets() {
+    bullets.foreach(b => {
+      b.velY += gobjects.gravity
+      b.x += b.velX
+      b.y += b.velY
+    })
+  }
+
+  def finished = {
+    val fin = changeStage(startTime)
+    if (fin) startTime = -1L
+    fin
+  }
+
+  def damage(at: Attackable, bullet: Bullet) {
+    at.health_-=(damage)
+    bullets -= bullet
+  }
+
+  def removeBullet(b: Bullet) {
+    bullets -= b
+  }
+
+  def collideWithWall(bullet: Bullet) {
+    bullets -= bullet
+  }
+
+  def start(x: Float, y: Float, sx: Float, sy: Float, dir: Int) {
+    if (startTime == -1)
+      startTime = gobjects.milli
+    if (fireTime == -1 || gobjects.milli - fireTime > fireInterval) {
+      fireTime = gobjects.milli
+      addBullet(x, y, 10, 10, dir)
+    }
+  }
+
+  def addBullet(x: Float, y: Float, sx: Float, sy: Float, dirX: Int, dirY: Int = 1, loc: String = "bullet_large.png") {
+    bullets += new Bullet(x, y, sx, sy, bulletVelX * dirX, bulletVelY * dirY, loc)
+  }
+}
+
+
+trait Attacker {
+  this: GObject =>
+  var target: Attackable = _
+  var attacks = new ListBuffer[Attack]
+  var stage = 0
+
+  def wallCollide(collision: ListBuffer[Rectangle]) {
+    for (i <- collision)
+      for (attack <- attacks)
+        for (bullet <- attack.bullets)
+          if (bullet.coll.intersects(i))
+            attack.collideWithWall(bullet)
+  }
+
+
+  def targetCollide(enemies: ListBuffer[Enemy], damage: Int) {
+    if (Player == target) {
+      val temp = new ListBuffer[Bullet]
+      for (attack <- attacks)
+        temp ++= attack.bullets.filter(_.coll.intersects(Player.coll))
+      temp.filter(!Player.invincible && _.coll.intersects(Player.coll)).foreach(attacks(stage).damage(Player, _))
+      temp.foreach(attacks(stage).removeBullet)
+    }
+    else {
+      for (enemy <- enemies)
+        attacks(stage).bullets.filter(_.coll.intersects(enemy.coll)).foreach(attacks(stage).damage(enemy, _))
+    }
+  }
+
+  def fire(dir: Int) {
+    attacks(stage).start(x + sx / 2, y + sy / 2, sx, sy, dir)
+  }
+
+  def renderBullets(g: Graphics) {
+    attacks.foreach(_.bullets.foreach(_ render g))
+  }
+
+  class NoWallCollideStraightAttack(damage: Int, interval: Long, velX: Float, velY: Float = 0)
+                                   (changeStage: Long => Boolean) extends Attack(damage, interval, velX, velY)(changeStage) {
+
+    override def collideWithWall(bullet: Bullet) = {}
+
+    override def updateBullets() = {
+      bullets.foreach(b => b.x += b.velX)
+      bullets = bullets.filterNot(b => b.x < 0 || b.x > NormalStage.map.width || b.y < 0 || b.y > NormalStage.map
+        .height)
+    }
+  }
+
+  class CircularStraightAttack(damage: Int, interval: Long, velX: Float, velY: Float)(changeStage: Long => Boolean)
+    extends NoWallCollideStraightAttack(damage, interval, velX, velY)(changeStage) {
+
+    override def addBullet(x: Float, y: Float, sx: Float, sy: Float, dirX: Int, dirY: Int, loc: String =
+    "bullet_large.png") {
+      for (i <- -1 to 1; j <- -1 to 1)
+        if (!(i == 0 && j == 0))
+          super.addBullet(x, y, sx, sy, i, j)
+    }
+
+    override def updateBullets() = {
+      bullets.foreach(b => b.y += b.velY)
+      super.updateBullets()
+    }
+  }
+
+  class SineAttack(damage: Int, fireInterval: Long, bulletVelX: Float, bulletVelY:
+  Float = 0)(changeStage: Long => Boolean) extends Attack(damage, fireInterval, bulletVelX, bulletVelY)(changeStage) {
+    override def updateBullets() {
+      bullets.foreach(b => {
+//        b.velY += gobjects.gravity
+        b.x += b.velX
+        b.y = gobjects.oscillate(b.inity - sy, b.inity + sy , bulletVelY).toFloat
+      })
+    }
+
+    override def collideWithWall(bullet: Bullet) {
+    }
+  }
+
+  class ReboundAttack(damage: Int, fireInterval: Long, bulletVelX: Float, bulletVelY:
+  Float = 0)(changeStage: Long => Boolean) extends NoWallCollideStraightAttack (damage, fireInterval, bulletVelX, bulletVelY)(changeStage)
+  {
+    override def collideWithWall(bullet: Bullet): Unit ={
+      bullet.velX *= -1
+      bullet.velY *= -1
+    }
+  }
+}
+

@@ -1,0 +1,47 @@
+package main
+
+import java.net.URL
+
+import TWLSlick.TWLStateBasedGame
+import gamestates.{StartScreen, NormalStage}
+import org.newdawn.slick.{AppGameContainer, GameContainer, ScalableGame}
+
+object Main {
+  val width = 1600
+  val height = 900
+
+  val scale = 1.5f
+  val scalabeG = new ScalableGame(Game, width, height, true)
+  val appgc = new AppGameContainer(scalabeG)
+
+  def unit = appgc.getWidth / 100
+
+  def main(args: Array[String]) {
+    System.setProperty("org.lwjgl.opengl.Display.enableHighDPI", "true")
+        appgc.setDisplayMode(width, height, false)
+//    appgc.setFullscreen(true)
+    appgc.setTargetFrameRate(60)
+    appgc.setVSync(true)
+    appgc.start()
+  }
+
+  object Game extends TWLStateBasedGame("Eataries") {
+    val GameId = 1
+    val LoadingScreenId = 2
+    val StartScreenId = 3
+    val ShopId = 4
+
+    override def initStatesList(container: GameContainer) {
+      addState(StartScreen)
+      addState(NormalStage)
+      enterState(Game.StartScreenId)
+    }
+
+    override protected def getThemeURL: URL = {
+      val url = Game.getClass.getResource("/ui/BNS.xml")
+      if (url == null)
+        println("shit : url to gameui not found")
+      url
+    }
+  }
+}

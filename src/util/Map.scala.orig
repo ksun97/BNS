@@ -1,0 +1,62 @@
+package util
+
+import gobjects.enemies.Enemy
+import main.Main
+import org.newdawn.slick.geom.Rectangle
+import org.newdawn.slick.tiled.TiledMap
+import org.newdawn.slick.{Game, GameContainer, Graphics}
+
+import scala.collection.mutable.ListBuffer
+
+
+case class Map(loc: String) {
+
+  val map = new TiledMap(loc, "res/")
+  val collision = new ListBuffer[Rectangle]
+  var enemies = ListBuffer(Enemy.pheonix(200, 200),Enemy(100, 100), Enemy(20, 20), Enemy(320, 200))
+  var deadEnemies = ListBuffer[Enemy]()
+  for (i <- 0 to map.getObjectGroupCount)
+    for (j <- 0 until map.getObjectCount(i))
+      collision += new Rectangle(map.getObjectX(i, j), map.getObjectY(i, j), map.getObjectWidth(i, j), map
+        .getObjectHeight(i, j))
+
+  collision += new Rectangle(-1, 0, 1, height)
+  collision += new Rectangle(0, -1, width, 1)
+  collision += new Rectangle(0, height, width, 1)
+  collision += new Rectangle(width, 0, 1, height)
+
+  def update(c: GameContainer, game: Game, delta: Int) {
+    deadEnemies.foreach(_.updateBullets(collision, enemies))
+    enemies.foreach(_.update(collision, enemies))
+    deadEnemies = enemies.filter(_.health < 0)
+    enemies --= deadEnemies
+    deadEnemies --= deadEnemies.filter(e => e.attacks(e.stage).bullets.size == 0)
+  }
+
+  def render(g: Graphics, scale: Float = Main.scale) {
+    renderMap(scale)
+    collision.foreach(g.draw(_))
+    enemies.foreach(_.render(g))
+    deadEnemies.foreach(_.renderBullets(g))
+  }
+
+  def renderMap(scale: Float) {
+    for (i <- 0 until map.getLayerCount; x <- 0 until cols; y <- 0 until rows) {
+      val tmp = map.getTileImage(x, y, i)
+      if (tmp != null)
+        tmp.draw(x * scale * tileWidth, y * scale * tileWidth, scale)
+    }
+  }
+
+  def tileWidth = map.getTileWidth
+
+  def tileHeight = map.getTileHeight
+
+  def cols = map.getWidth
+
+  def rows = map.getHeight
+
+  def width = tileWidth * cols
+
+  def height = tileHeight * rows
+}

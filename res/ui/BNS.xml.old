@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE themes PUBLIC "-//www.matthiasmann.de//TWL-Theme//EN" "http://hg.l33tlabs.org/twl/raw-file/tip/src/de/matthiasmann/twl/theme/theme.dtd">
+<themes>
+    <images file="main_bg.png">
+        <area name="mainbg.background" xywh="*" tiled="true"/>
+    </images>
+    <images file="gate0.png">
+        <area name="gate" xywh="*"/>
+    </images>
+    <images file="widgets.png">
+        <area name="button" xywh="1,1,42,34" nocenter="true" splitx="L13,R13" splity="T5,B5"/>
+        <area name="bar" xywh="47,5,30,20" repeatX="true" tint="#B92020"/>
+    </images>
+    <fontDef name="normal" filename="font.fnt" color="white" default="true">
+   </fontDef>
+
+    <inputMapDef name="-defaultInputMap">
+        <action name="pause">P</action>
+        <action name="reload">R</action>
+    </inputMapDef>
+    <theme name="-defaults">
+        <param name="background"><image>none</image></param>
+        <param name="overlay"><image>none</image></param>
+        <param name="font"><font>normal</font></param>
+        <param name="textAlignment"><enum type="alignment">left</enum></param>
+        <param name="minWidth"><int>0</int></param>
+        <param name="minHeight"><int>0</int></param>
+        <param name="maxWidth"><int>0</int></param>
+        <param name="maxHeight"><int>0</int></param>
+        <param name="inputMap"><inputMap>-defaultInputMap</inputMap></param>
+    </theme>
+    <theme name="bns" ref="-defaults">
+        <param name="font"><font>normal</font></param>
+        <param name="font"><fontDef filename="font.fnt" color="white">
+            </fontDef></param>
+        <theme name="button" allowWildcard="false">
+            <param name="overlay"><image>none</image></param>
+            <param name="font"><font>normal</font></param>
+            <param name="textAlignment"><enum type="alignment">left</enum></param>
+            <param name="minWidth"><int>50</int></param>
+            <param name="minHeight"><int>50</int></param>
+            <param name="maxWidth"><int>500</int></param>
+            <param name="maxHeight"><int>500</int></param>
+            <param name="inputMap"><inputMap>-defaultInputMap</inputMap></param>
+            <param name="background"><image>button</image></param>
+            <param name="border"><border>10,0</border></param>
+        </theme>
+        <theme name="progressbar" ref="-defaults">
+            <param name="progressImage"><image>bar</image></param>
+        </theme>
+    
+    </theme>
+
+
+</themes>

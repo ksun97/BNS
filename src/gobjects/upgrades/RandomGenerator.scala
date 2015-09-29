@@ -1,0 +1,57 @@
+package gobjects.upgrades
+
+import gamestates.NormalStage
+import gobjects.enemies.{EnemiesList, Enemy}
+
+import scala.collection.mutable.ListBuffer
+import scala.util
+
+object RandomGenerator {
+  val random = util.Random
+  random.setSeed(gobjects.milli)
+
+  def upgrades: ((Float, Float) => BasicUpgrade, (Float, Float) => BasicUpgrade, (Float, Float) => BasicUpgrade) = {
+    var rankLeft = upgradeRankTotal
+    val one = random.nextInt(rankLeft) + 1
+    rankLeft -= upgradeRankTotal - one
+    if (rankLeft <= 0) rankLeft = 1
+    val two = random.nextInt(rankLeft) + 1
+    rankLeft -= two
+    if (rankLeft <= 0) rankLeft = 1
+    val three = random.nextInt(rankLeft) + 1
+    val upgrades = UpgradesList.Upgrades.groupBy(_._2) map { case (key, value) => (key, value.unzip._1) }
+
+    var temp = upgrades(one).toArray
+    var which = random.nextInt() % temp.length
+    val firstUpgrade = temp(which)
+    temp = upgrades(two).toArray
+    which = random.nextInt() % temp.length
+    val secondUpgrade = temp(which)
+    temp = upgrades(three).toArray
+    which = random.nextInt() % temp.length
+    val thirdUpgrade = temp(which)
+    (firstUpgrade, secondUpgrade, thirdUpgrade)
+  }
+
+  def enemies = {
+    var rankLeft = rankTotal
+    val rankedEnemies = EnemiesList.Enemies.groupBy(_.rank)
+    println(rankedEnemies)
+    val end = new ListBuffer[Enemy]
+    while (rankLeft > 0) {
+      val one = random.nextInt(if(rankLeft < 5) rankLeft else 4) + 1
+      rankLeft -= one
+      val temp = rankedEnemies(one).toArray
+      val which = random.nextInt(temp.length)
+      end += temp(which).copy
+    }
+    end
+  }
+
+  def upgradeRankTotal = if (NormalStage.waveNum + 1 < 5) NormalStage.waveNum + 1 else 5
+
+  def rankTotal = (3 + NormalStage.waveNum)
+
+}
+
+
